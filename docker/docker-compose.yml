@@ -1,0 +1,45 @@
+services:
+  # MQTT Broker (Eclipse Mosquitto) - Wird für die Kommunikation zwischen Zigbee2MQTT und Home Assistant verwendet
+  mqtt:
+    container_name: mqtt  # Name des Containers im Docker-System
+    image: eclipse-mosquitto:latest  # Verwendet die neueste Version von Eclipse Mosquitto
+    restart: unless-stopped  # Container wird automatisch neugestartet, außer bei manuellem Stopp
+    network_mode: host  # Verwendet das Host-Netzwerk für bessere Kompatibilität
+    volumes:  # Persistente Datenspeicherung
+      - ./mosquitto-data:/mosquitto  # Hauptverzeichnis für MQTT-Daten
+      - ./mosquitto-data/config:/mosquitto/config  # Konfigurationsdateien
+      - ./mosquitto-data/log:/mosquitto/log  # Logdateien
+    user: "1000:1000"  # Läuft als nicht-root Benutzer für bessere Sicherheit
+
+  # Zigbee2MQTT - Bridge zwischen Zigbee-Geräten und MQTT
+  zigbee2mqtt:
+    container_name: zigbee2mqtt
+    image: koenkk/zigbee2mqtt  # Offizielles Zigbee2MQTT Image
+    restart: unless-stopped
+    network_mode: host  # Notwendig für die Kommunikation mit dem MQTT-Broker
+    environment:
+      - TZ=Europe/Berlin  # Setzt die Zeitzone für korrekte Zeitstempel
+    volumes:
+      - ./zigbee2mqtt-data:/app/data  # Speichert Konfiguration und Daten
+      - /run/udev:/run/udev:ro  # Notwendig für USB-Geräteerkennung
+    devices:
+      - /dev/ttyS0:/dev/ttyS0  # Gibt dem Container Zugriff auf den Conbee II Adapter
+    privileged: true  # Notwendig für Hardware-Zugriff
+    depends_on:  # Startet erst nach dem MQTT-Broker
+      - mqtt
+
+  # Home Assistant
+  homeassistant:
+    image: homeassistant/home-assistant:2024.12  # Spezifische Version für Stabilität
+    container_name: homeassistant
+    restart: unless-stopped
+    network_mode: host  # Ermöglicht die Erkennung von Geräten im Netzwerk
+    environment:
+      - TZ=Europe/Berlin  # Zeitzoneneinstellung für korrekte Zeitanzeige
+    volumes:
+      - ./homeassistant-data:/config # Persistente Speicherung der Home Assistant Konfiguration
+      - /etc/localtime:/etc/localtime:ro # Synchronisiert die Systemzeit mit dem Host
+      - /run/dbus:/run/dbus:ro   # Notwendig für verschiedene Systemintegrationen (Bluetooth, Sound, etc.)
+    depends_on:  # Definiert die Startreihenfolge
+      - mqtt        # Startet nach MQTT
+      - zigbee2mqtt # Startet nach Zigbee2MQTT
