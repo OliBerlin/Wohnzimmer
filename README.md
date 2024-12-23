@@ -3,10 +3,22 @@ Da mein Verstärker kein Spotify-Connect unterstützt und erste Smarte Geräte i
 
 HAOS ist jedoch auf der vorhandenen Hardware (Raspberry Pi 3B+, 1GB RAM) etwas langsam. Dies zeigte sich an regelmäßigen Aussetzern bei dem Spotify-AddOn. Durch das Hosten von HA in einem Docker-Containter ist die Performance gestiegen und Spotify läuft stabil mit 320Bit.
 
+Man muß jedoch auch den Nachteil von diesem Setup beachten:
+- keine AddOns
+- keine Updates (Updates müssen über Docker compose eingespielt werden)
+
 So kann der Raspi ohne Probleme auch für weitere Projekte genutzt werden.
 
+## Vorgehen
+Für die ganz eiligen kann einfach der Installer gestartet werden😉 Während der Installation wird ein Random-PW für den MQTT-Broker erzeugt, welches später in HA angegeben werden muß.
+
+Alternativ kann die Dokumentation von oben nach unten straight abgearbeitet werden.
+```bash
+wget https://github.com/OliBerlin/Wohnzimmer/raw/refs/heads/main/install.sh -O - | bash
+```
+
 # OS
-Es wird die aktuelle Version Debian 12 (Bookworm-arm64) verwendet.
+Es wird die aktuelle Version Debian 12 (Bookworm-arm64) verwendet. Das ganze headless, sprich, ohne Desktop
 
 ## Repositories
 ### Vorbereitungen
@@ -34,7 +46,7 @@ dtparam=audio=off
 [all]
 enable_uart=1
 ```
-Damit die serielle Schnittstelle nutzbar ist, ist in der Datei der Eintrag `console=serial0,115200` zu entfernen. **Achtung, diese Zeile kann u.U. anders aussehen**:
+Damit die serielle Schnittstelle nutzbar ist, ist in der Datei `/boot/firmware/cmdline.txt` der Eintrag `console=serial0,115200` zu entfernen. **Achtung, diese Zeile kann u.U. anders aussehen**:
 ```plaintext
 console=tty1 root=PARTUUID=a60345bb-02 rootfstype=ext4 fsck.repair=yes rootwait cfg80211.ieee80211_regdom=DE
 ```
