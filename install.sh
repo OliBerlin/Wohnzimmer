@@ -15,46 +15,23 @@ check_command() {
 
 # Function to generate secure random password
 generate_password() {
-    # Generate a 32 character random password with special characters
-    password=$(tr -dc 'A-Za-z0-9!#$%&()*+,-./:;<=>?@[\]^_`{|}~' </dev/urandom | head -c 32)
-    echo "$password"
+    tr -dc 'A-Za-z0-9!#$%&()*+,-./:;<=>?@[\]^_`{|}~' </dev/urandom | head -c 32
 }
 
 # Clone repository
 echo "Cloning Wohnzimmer repository..."
 git clone https://github.com/OliBerlin/Wohnzimmer
-cd wohnzimmer
+cd Wohnzimmer
 check_command "Repository clone"
 
-# Generate passwords
-echo "Generating secure passwords..."
+# Generate MQTT password
 MQTT_PASSWORD=$(generate_password)
-ZIGBEE2MQTT_PASSWORD=$(generate_password)
-
-# Save passwords to a secure file
-echo "Saving passwords to secure file..."
-cat > ./passwords.txt << EOF
-MQTT Password: $MQTT_PASSWORD
-Zigbee2MQTT Password: $ZIGBEE2MQTT_PASSWORD
-EOF
-chmod 600 ./passwords.txt
-
-# Update Docker configuration with new passwords
-echo "Updating Docker configuration..."
-if [ -f "./docker/mqtt/config/mosquitto.conf" ]; then
-    # Create password file for mosquitto
-    echo "mqtt:$MQTT_PASSWORD" | sudo tee ./docker/mqtt/config/mosquitto.passwd > /dev/null
-    sudo mosquitto_passwd -U ./docker/mqtt/config/mosquitto.passwd
-fi
-
-# Update Zigbee2MQTT configuration
-if [ -f "./docker/zigbee2mqtt/data/configuration.yaml" ]; then
-    sudo sed -i "s/password: .*/password: $ZIGBEE2MQTT_PASSWORD/" ./docker/zigbee2mqtt/data/configuration.yaml
-fi
+echo "Generated MQTT password: $MQTT_PASSWORD"
+echo "Please save this password for configuring Home Assistant!"
 
 # Install prerequisites
 echo "Installing prerequisites..."
-sudo apt install -y apt-transport-https mosquitto-clients
+sudo apt install -y apt-transport-https
 check_command "apt-transport-https installation"
 
 # Add repository keys
@@ -79,26 +56,19 @@ echo "Installing Raspotify and Docker..."
 sudo apt install -y raspotify docker-ce docker-ce-cli containerd.io
 check_command "Package installation"
 
-# Set up Docker environment
-echo "Setting up Docker environment..."
-cd docker
-sudo docker compose up -d
-check_command "Docker setup"
-
-# Configure system settings
-echo "Configuring system settings..."
-sudo sed -i 's/console=serial0,115200//' /boot/firmware/cmdline.txt
-sudo sed -i 's/dtparam=audio=on/dtparam=audio=off/' /boot/firmware/config.txt
-check_command "System configuration"
-
 # Configure Raspotify
 echo "Configuring Raspotify..."
 sudo sed -i 's/#LIBRESPOT_BITRATE="160"/LIBRESPOT_BITRATE="320"/' /etc/raspotify/conf
 sudo sed -i 's/#DEVICE_NAME="raspotify"/DEVICE_NAME="Wohnzimmer"/' /etc/raspotify/conf
 check_command "Raspotify configuration"
 
-# Configure UART
-echo "Configuring UART..."
+# Configure firmware settings
+echo "Configuring firmware settings..."
+# Remove console from cmdline.txt
+sudo sed -i 's/console=serial0,115200//' /boot/firmware/cmdline.txt
+
+# Update config.txt
+sudo sed -i 's/dtparam=audio=on/dtparam=audio=off/' /boot/firmware/config.txt
 if ! grep -q '^\[all\]' /boot/firmware/config.txt; then
     echo -e "\n[all]\nenable_uart=1" | sudo tee -a /boot/firmware/config.txt
 else
@@ -107,9 +77,21 @@ else
         sudo sed -i '/^\[all\]/a enable_uart=1' /boot/firmware/config.txt
     fi
 fi
-check_command "UART configuration"
+check_command "Firmware configuration"
+
+# Start Docker containers
+echo "Starting Docker containers..."
+cd docker
+sudo docker compose up -d
+check_command "Docker startup"
 
 echo "Installation completed successfully!"
-echo "Passwords have been saved to ./passwords.txt"
-echo "Please save these passwords in a secure location and delete passwords.txt after setup"
-echo "Please reboot your system for changes to take effect."
+echo "======================================"
+echo "Access points:"
+echo "Home Assistant: http://<raspberry-ip>:8123"
+echo "Zigbee2MQTT: http://<raspberry-ip>:8080"
+echo "MQTT: mqtt://<raspberry-ip>:1883"
+echo "======================================"
+echo "MQTT password: $MQTT_PASSWORD"
+echo "Please save this password for configuring Home Assistant!"
+echo "Please reboot your system for all changes to take effect."
