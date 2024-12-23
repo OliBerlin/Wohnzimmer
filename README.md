@@ -1,8 +1,13 @@
-Als Hardware kommt ein Raspberry Pi 3B+ sowie ein Raspbee II als GPIO-Stecker zum Einsatz. Um nicht ständig den Brummton durch den Klinkenstecker zu hören, wurde HDMI als Audio-Ausgang gewählt.
+# Allgemeines
+Da mein Verstärker kein Spotify-Connect unterstützt und erste Smarte Geräte im Haushalt vorhanden sind, bietet sich der Einsatz vom [Home Assistant](https://www.home-assistant.io/) an. Vorhanden ist auch bereits ein Zigbee-Connector (Phoscon RaspBee II). 
+HAOS ist jedoch auf der vorhandenen Hardware (Raspberry Pi 3B+) etwas langsam.
 
+HAOS ist jedoch auf der vorhandenen Hardware (Raspberry Pi 3B+) etwas langsam. Dies zeigte sich an regelmäßigen Aussetzern bei dem Spotify-AddOn. Durch das Hosten von HA in einem Docker-Containter ist die Performance gestiegen und Spotify läuft stabil mit 320Bit.
+
+So kann der Raspi ohne Probleme auch für weitere Projekte genutzt werden.
 
 # OS
-Zum Einsatz kommt ein aktuelles debian 12 (Bookworm-arm64).
+Es wird die aktuelle Version Debian 12 (Bookworm-arm64) verwendet.
 
 ## Repositories
 ### Vorbereitungen
@@ -23,13 +28,14 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docke
 sudo apt update
 ```
 ## Firmware
-Da ausschließlich HDMI als Output gewählt wird, wurde der Soundtreiber für den Klinkenausgang folgendermaßen in der Datei /boot/firmware/config.txt deaktiviert. Ebenfalls wurde die serielle Schnittstelle mittels GPIO aktiviert.
+Da ausschließlich HDMI als Output gewählt wird, wurde der Soundtreiber für den Klinkenausgang folgendermaßen in der Datei `/boot/firmware/config.txt` deaktiviert. Ebenfalls wurde die serielle Schnittstelle mittels GPIO aktiviert.
 ```plaintext
 dtparam=audio=off
+
 [all]
 enable_uart=1
 ```
-Damit die serielle Schnittstelle nutzbar ist, ist in der Datei der Eintrag console=serial0,115200 zu entfernen. **Achtung, diese Zeile kann u.U. anders aussehen**:
+Damit die serielle Schnittstelle nutzbar ist, ist in der Datei der Eintrag `console=serial0,115200` zu entfernen. **Achtung, diese Zeile kann u.U. anders aussehen**:
 ```plaintext
 console=tty1 root=PARTUUID=a60345bb-02 rootfstype=ext4 fsck.repair=yes rootwait cfg80211.ieee80211_regdom=DE
 ```
@@ -57,7 +63,7 @@ sudo apt install docker-ce docker-ce-cli containerd.io
 mkdir docker
 cd docker
 ```
-nano docker-compose.yml
+`docker-compose.yml`
 ```yaml
 services:
   # MQTT Broker (Eclipse Mosquitto) - Wird für die Kommunikation zwischen Zigbee2MQTT und Home Assistant verwendet
