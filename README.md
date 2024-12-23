@@ -1,8 +1,7 @@
 # Allgemeines
 Da mein Verstärker kein Spotify-Connect unterstützt und erste Smarte Geräte im Haushalt vorhanden sind, bietet sich der Einsatz vom [Home Assistant](https://www.home-assistant.io/) an. Vorhanden ist auch bereits ein Zigbee-Connector (Phoscon RaspBee II). 
-HAOS ist jedoch auf der vorhandenen Hardware (Raspberry Pi 3B+) etwas langsam.
 
-HAOS ist jedoch auf der vorhandenen Hardware (Raspberry Pi 3B+) etwas langsam. Dies zeigte sich an regelmäßigen Aussetzern bei dem Spotify-AddOn. Durch das Hosten von HA in einem Docker-Containter ist die Performance gestiegen und Spotify läuft stabil mit 320Bit.
+HAOS ist jedoch auf der vorhandenen Hardware (Raspberry Pi 3B+, 1GB RAM) etwas langsam. Dies zeigte sich an regelmäßigen Aussetzern bei dem Spotify-AddOn. Durch das Hosten von HA in einem Docker-Containter ist die Performance gestiegen und Spotify läuft stabil mit 320Bit.
 
 So kann der Raspi ohne Probleme auch für weitere Projekte genutzt werden.
 
