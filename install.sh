@@ -18,8 +18,9 @@ generate_password() {
     tr -dc 'A-Za-z0-9!#$%&()*+,-./:;<=>?@[\]^_`{|}~' </dev/urandom | head -c 32
 }
 
+# Install git
 echo "Installing git..."
-sudo apt install git -y
+sudo apt install -y git
 check_command "git installation"
 
 # Clone repository
@@ -50,10 +51,12 @@ echo 'deb https://dtcooper.github.io/raspotify raspotify main' | sudo tee /etc/a
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 check_command "Repository addition"
 
-# Update package lists
-echo "Updating package lists..."
+# Update and upgrade system
+echo "Updating system packages..."
 sudo apt update
-check_command "Package list update"
+echo "Upgrading system packages..."
+sudo apt upgrade -y
+check_command "System upgrade"
 
 # Install required packages
 echo "Installing Raspotify and Docker..."
