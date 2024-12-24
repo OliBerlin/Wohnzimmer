@@ -164,3 +164,6 @@ Home Assistant: http://*raspberry-ip*:8123
 Zigbee2MQTT: http://*raspberry-ip*:8080
 
 MQTT: mqtt://*raspberry-ip*:1883
+
+# Anmerkungen
+Die compose-Datei und der Installer wurden mit Hilfe von [Claude AI](https://claude.ai) überarbeitet.
