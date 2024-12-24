@@ -18,8 +18,9 @@ generate_password() {
     tr -dc 'A-Za-z0-9!#$%&()*+,-./:;<=>?@[\]^_`{|}~' </dev/urandom | head -c 32
 }
 
-# Getting git
-sudo apt install git
+echo "Installing git..."
+sudo apt install git -y
+check_command "git installation"
 
 # Clone repository
 echo "Cloning Wohnzimmer repository..."
