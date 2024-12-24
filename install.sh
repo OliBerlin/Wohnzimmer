@@ -18,6 +18,9 @@ generate_password() {
     tr -dc 'A-Za-z0-9!#$%&()*+,-./:;<=>?@[\]^_`{|}~' </dev/urandom | head -c 32
 }
 
+# Getting git
+sudo apt install git
+
 # Clone repository
 echo "Cloning Wohnzimmer repository..."
 git clone https://github.com/OliBerlin/Wohnzimmer
