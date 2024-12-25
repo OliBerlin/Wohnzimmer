@@ -25,12 +25,10 @@ echo "Adding repositories to sources..."
 echo 'deb https://dtcooper.github.io/raspotify raspotify main' | sudo tee /etc/apt/sources.list.d/raspotify.list
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-
 # Clone repository
 echo "Cloning Wohnzimmer repository..."
 git clone https://github.com/OliBerlin/Wohnzimmer
 cd Wohnzimmer
-
 
 # Generate and configure mosquitto 
 zigbee2MQTT_PASSWORD=$(generate_password)
@@ -54,7 +52,6 @@ sudo apt upgrade -y
 # Install required packages
 echo "Installing Raspotify and Docker..."
 sudo apt install -y raspotify docker-ce docker-ce-cli containerd.io
-
 
 # Configure Raspotify
 echo "Configuring Raspotify..."
