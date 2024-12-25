@@ -52,7 +52,9 @@ sudo apt upgrade -y
 echo "Installing Docker..."
 sudo apt install -y docker-ce docker-ce-cli containerd.io
 
-# Configure Raspotify
+# Installing and Configure Raspotify
+wget https://dtcooper.github.io/raspotify/raspotify-latest_arm64.deb
+sudo apt install -f ./raspotify-latest_arm64.deb -y
 echo "Configuring Raspotify..."
 sudo sed -i 's/#LIBRESPOT_BITRATE="160"/LIBRESPOT_BITRATE="320"/' /etc/raspotify/conf
 sudo sed -i 's/#LIBRESPOT_NAME="Librespot"/LIBRESPOT_NAME="Wohnzimmer"/' /etc/raspotify/conf
