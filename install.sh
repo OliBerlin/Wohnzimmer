@@ -32,12 +32,16 @@ cd Wohnzimmer/
 # Generate and configure mosquitto 
 zigbee2MQTT_PASSWORD=$(generate_password)
 homeassistant2MQTT_PASSWORD=$(generate_password)
+UserID=id -u mosquitto
+GroupID=ig -g mosquitto
+
 sudo mosquitto_passwd -H sha512-pbkdf2 -b -c /etc/mosquitto/wohnzimmer.pwd zigbee2MQTT $zigbee2MQTT_PASSWORD
 sudo mosquitto_passwd -H sha512-pbkdf2 -b /etc/mosquitto/wohnzimmer.pwd homeassistant $homeassistant2MQTT_PASSWORD
 sudo cp mosquitto/wohnzimmer.conf /etc/mosquitto/conf.d/wohnzimmer.conf
 sudo cp mosquitto/wohnzimmer.acl /etc/mosquitto/wohnzimmer.acl
+sudo echo "user: $UserID:$GroupID" /etc/mosquitto/conf.d/wohnzimmer.conf
 
-# Update Zigbee2MQTT configuration with MQTT password
+# Update Zigbee2MQTT configuration with MQTT password and running as
 echo "Updating Zigbee2MQTT configuration..."
 echo "user: zigbee2mqtt" >> docker/zigbee2mqtt-data/configuration.yaml
 echo "password: $ZIGBEE2MQTT_PASSWORD" >> docker/zigbee2mqtt-data/configuration.yaml
