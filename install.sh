@@ -48,11 +48,9 @@ sudo apt update
 echo "Upgrading system packages..."
 sudo apt upgrade -y
 
-# Install required packages
+# Install docker packages
 echo "Installing Docker..."
 sudo apt install -y docker-ce docker-ce-cli containerd.io
-wget https://dtcooper.github.io/raspotify/raspotify-latest_arm64.deb
-sudo apt install -f -/raspotify-latest_arm64.deb -y
 
 # Configure Raspotify
 echo "Configuring Raspotify..."
