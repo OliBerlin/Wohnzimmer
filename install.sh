@@ -28,6 +28,7 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docke
 # Clone repository
 echo "Cloning Wohnzimmer repository..."
 git clone https://github.com/OliBerlin/Wohnzimmer
+sleep 1
 cd Wohnzimmer
 
 # Generate and configure mosquitto 
