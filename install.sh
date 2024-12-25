@@ -17,12 +17,10 @@ sudo apt install -y git mosquitto
 
 # Add repository keys
 echo "Adding repository keys..."
-curl -sSL https://dtcooper.github.io/raspotify/key.asc | gpg --dearmor | sudo tee /usr/share/keyrings/raspotify-archive-keyring.gpg > /dev/null
 curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/docker-archive-keyring.gpg > /dev/null
 
 # Add repositories
 echo "Adding repositories to sources..."
-echo 'deb https://dtcooper.github.io/raspotify raspotify main' | sudo tee /etc/apt/sources.list.d/raspotify.list
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 # Clone repository
@@ -51,8 +49,10 @@ echo "Upgrading system packages..."
 sudo apt upgrade -y
 
 # Install required packages
-echo "Installing Raspotify and Docker..."
-sudo apt install -y raspotify docker-ce docker-ce-cli containerd.io
+echo "Installing Docker..."
+sudo apt install -y docker-ce docker-ce-cli containerd.io
+wget https://dtcooper.github.io/raspotify/raspotify-latest_arm64.deb
+sudo apt install -f -/raspotify-latest_arm64.deb -y
 
 # Configure Raspotify
 echo "Configuring Raspotify..."
