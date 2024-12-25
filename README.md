@@ -21,20 +21,14 @@ wget https://github.com/OliBerlin/Wohnzimmer/raw/refs/heads/main/install.sh -O -
 Es wird die aktuelle Version Debian 12 (Bookworm-arm64) verwendet. Das ganze headless, sprich, ohne Desktop
 
 ## Repositories
-### Vorbereitungen
-Um Repositorities hinzuzufügen, sind folgende Steps notwendig:
-```bash
-sudo apt install -y apt-transport-https
-```
+
 ### Keys
 Um die Signierung der Repositories zu überprüfen, sind die Keys in das System einzuspielen:
 ```bash
-curl -sSL https://dtcooper.github.io/raspotify/key.asc | sudo apt-key add -v -
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 ```
 ### Repos
 ```bash
-echo 'deb https://dtcooper.github.io/raspotify raspotify main' | sudo tee /etc/apt/sources.list.d/raspotify.list
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt update
 ```
@@ -55,7 +49,8 @@ Es gibt verschiedene Lösungen, um Spotify-Connect umzusetzen, hier wurde raspot
 
 ## Installation
 ```bash
-sudo apt install raspotify
+wget https://dtcooper.github.io/raspotify/raspotify-latest_arm64.deb
+sudo apt install -f raspotify-latest_arm64.deb
 ```
 ## Konfiguration 
 /etc/raspotify/conf:
