@@ -12,7 +12,7 @@ generate_password() {
 
 # Install prerequisites
 echo "Installing prerequisites..."
-sudo apt install -y apt-transport-https git mqtt
+sudo apt install -y apt-transport-https git mosquitto
 
 
 # Add repository keys
