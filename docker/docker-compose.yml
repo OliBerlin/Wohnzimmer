@@ -1,16 +1,4 @@
 services:
-  # MQTT Broker (Eclipse Mosquitto) - Wird für die Kommunikation zwischen Zigbee2MQTT und Home Assistant verwendet
-  mqtt:
-    container_name: mqtt  # Name des Containers im Docker-System
-    image: eclipse-mosquitto:latest  # Verwendet die neueste Version von Eclipse Mosquitto
-    restart: unless-stopped  # Container wird automatisch neugestartet, außer bei manuellem Stopp
-    network_mode: host  # Verwendet das Host-Netzwerk für bessere Kompatibilität
-    volumes:  # Persistente Datenspeicherung
-      - ./mosquitto-data:/mosquitto  # Hauptverzeichnis für MQTT-Daten
-      - ./mosquitto-data/config:/mosquitto/config  # Konfigurationsdateien
-      - ./mosquitto-data/log:/mosquitto/log  # Logdateien
-    user: "1000:1000"  # Läuft als nicht-root Benutzer für bessere Sicherheit
-
   # Zigbee2MQTT - Bridge zwischen Zigbee-Geräten und MQTT
   zigbee2mqtt:
     container_name: zigbee2mqtt
