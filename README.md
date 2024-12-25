@@ -10,7 +10,7 @@ Man muß jedoch auch den Nachteil von diesem Setup beachten:
 So kann der Raspi ohne Probleme auch für weitere Projekte genutzt werden.
 
 ## Vorgehen
-Für die ganz eiligen kann einfach der Installer gestartet werden😉 Während der Installation wird ein Random-PW für den MQTT-Broker erzeugt, welches später in HA angegeben werden muß.
+Für die ganz eiligen kann einfach der Installer gestartet werden😉 Während der Installation wird ein Random-PW für zigbee2mqtt sowie homeassistant in mosquitto erzeugt, welches später in HA angegeben werden muß.
 
 Alternativ kann die Dokumentation von oben nach unten straight abgearbeitet werden.
 ```bash
@@ -63,6 +63,26 @@ sudo apt install raspotify
 LIBRESPOT_NAME="Wohnzimmer"
 LIBRESPOT_BITRATE="320"
 ```
+# mosquitto
+## Installation
+```bash
+sudo apt install mosquitto
+```
+## Konfiguration
+Da mosquitto noch ggf. für andere Dienste genutzt wird, sollte dieser möglichst abgesichert werden. Dies geschieht einerseits über Username/Password sowie über ACLs.
+### ACLs
+```plaintext
+user zigbee2MQTT
+topic readwrite zigbee2mqtt/#
+topic write homeassistant/#
+
+user homeassistant
+topic read zigbee2mqtt/#
+topic write zigbee2mqtt/+/set
+topic readwrite homeassistant/#
+```
+
+
 # Docker
 ## Installation
 ```bash
@@ -77,18 +97,6 @@ cd docker
 `docker-compose.yml`
 ```yaml
 services:
-  # MQTT Broker (Eclipse Mosquitto) - Wird für die Kommunikation zwischen Zigbee2MQTT und Home Assistant verwendet
-  mqtt:
-    container_name: mqtt  # Name des Containers im Docker-System
-    image: eclipse-mosquitto:latest  # Verwendet die neueste Version von Eclipse Mosquitto
-    restart: unless-stopped  # Container wird automatisch neugestartet, außer bei manuellem Stopp
-    network_mode: host  # Verwendet das Host-Netzwerk für bessere Kompatibilität
-    volumes:  # Persistente Datenspeicherung
-      - ./mosquitto-data:/mosquitto  # Hauptverzeichnis für MQTT-Daten
-      - ./mosquitto-data/config:/mosquitto/config  # Konfigurationsdateien
-      - ./mosquitto-data/log:/mosquitto/log  # Logdateien
-    user: "1000:1000"  # Läuft als nicht-root Benutzer für bessere Sicherheit
-
   # Zigbee2MQTT - Bridge zwischen Zigbee-Geräten und MQTT
   zigbee2mqtt:
     container_name: zigbee2mqtt
@@ -103,8 +111,6 @@ services:
     devices:
       - /dev/ttyS0:/dev/ttyS0  # Gibt dem Container Zugriff auf den Conbee II Adapter
     privileged: true  # Notwendig für Hardware-Zugriff
-    depends_on:  # Startet erst nach dem MQTT-Broker
-      - mqtt
 
   # Home Assistant
   homeassistant:
@@ -119,21 +125,9 @@ services:
       - /etc/localtime:/etc/localtime:ro # Synchronisiert die Systemzeit mit dem Host
       - /run/dbus:/run/dbus:ro   # Notwendig für verschiedene Systemintegrationen (Bluetooth, Sound, etc.)
     depends_on:  # Definiert die Startreihenfolge
-      - mqtt        # Startet nach MQTT
       - zigbee2mqtt # Startet nach Zigbee2MQTT
 ```
-### MQTT
-./mosquitto-data/config/mosquitto-data/config
 
-```plaintext
-persistence true
-persistence_location /mosquitto/data/
-log_dest file /mosquitto/log/mosquitto.log
-log_dest stdout
-# Erlaubt anonymen Zugriff (nur für Test/Entwicklung)
-allow_anonymous true
-listener 1883
-```
 ### zigbee2mqtt
 ./zigbee2mqtt-data/configuration.yaml
 ```yaml

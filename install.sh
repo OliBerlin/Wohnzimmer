@@ -5,69 +5,61 @@ set -e
 
 echo "Starting Wohnzimmer installation..."
 
-# Function to check command success
-check_command() {
-    if [ $? -ne 0 ]; then
-        echo "Error: $1 failed"
-        exit 1
-    fi
-}
-
 # Function to generate secure random password
 generate_password() {
-    tr -dc 'A-Za-z0-9!#$%&()*+,-./:;<=>?@[\]^_`{|}~' </dev/urandom | head -c 32
+    tr -dc 'A-Za-z0-9!#$%&()*+,-.' </dev/urandom | head -c 32
 }
-
-# Install git
-echo "Installing git..."
-sudo apt install -y git
-check_command "git installation"
-
-# Clone repository
-echo "Cloning Wohnzimmer repository..."
-git clone https://github.com/OliBerlin/Wohnzimmer
-cd Wohnzimmer
-check_command "Repository clone"
-
-# Generate MQTT password
-MQTT_PASSWORD=$(generate_password)
-echo "Generated MQTT password: $MQTT_PASSWORD"
-echo "Please save this password for configuring Home Assistant!"
 
 # Install prerequisites
 echo "Installing prerequisites..."
-sudo apt install -y apt-transport-https
-check_command "apt-transport-https installation"
+sudo apt install -y apt-transport-https git mqtt
+
 
 # Add repository keys
 echo "Adding repository keys..."
-curl -sSL https://dtcooper.github.io/raspotify/key.asc | sudo apt-key add -v -
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-check_command "Key addition"
+curl -sSL https://dtcooper.github.io/raspotify/key.asc | gpg --dearmor | sudo tee /usr/share/keyrings/raspotify-archive-keyring.gpg > /dev/null
+curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/docker-archive-keyring.gpg > /dev/null
 
 # Add repositories
 echo "Adding repositories to sources..."
 echo 'deb https://dtcooper.github.io/raspotify raspotify main' | sudo tee /etc/apt/sources.list.d/raspotify.list
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-check_command "Repository addition"
+
+
+# Clone repository
+echo "Cloning Wohnzimmer repository..."
+git clone https://github.com/OliBerlin/Wohnzimmer
+cd Wohnzimmer
+
+
+# Generate and configure mosquitto 
+zigbee2MQTT_PASSWORD=$(generate_password)
+homeassistant2MQTT_PASSWORD=$(generate_password)
+mosquitto_passwd -H sha512-pbkdf2 -b -c /etc/mosquitto/wohnzimmer.pwd zigbee2MQTT $zigbee2MQTT_PASSWORD
+mosquitto_passwd -H sha512-pbkdf2 -b /etc/mosquitto/wohnzimmer.pwd homeassistant $homeassistant2MQTT_PASSWORD
+cp mosquitto/mosquitto.conf /etc/mosquitto/conf.d/wohnzimmer.conf
+cp mosquitto/wohnzimmer.acl /etc/mosquitto/wohnzimmer.acl
+
+# Update Zigbee2MQTT configuration with MQTT password
+echo "Updating Zigbee2MQTT configuration..."
+echo "user: zigbee2mqtt" >> docker/zigbee2mqtt-data/configuration.yaml
+echo "password: $ZIGBEE2MQTT_PASSWORD" >> docker/zigbee2mqtt-data/configuration.yaml
 
 # Update and upgrade system
 echo "Updating system packages..."
 sudo apt update
 echo "Upgrading system packages..."
 sudo apt upgrade -y
-check_command "System upgrade"
 
 # Install required packages
 echo "Installing Raspotify and Docker..."
 sudo apt install -y raspotify docker-ce docker-ce-cli containerd.io
-check_command "Package installation"
+
 
 # Configure Raspotify
 echo "Configuring Raspotify..."
 sudo sed -i 's/#LIBRESPOT_BITRATE="160"/LIBRESPOT_BITRATE="320"/' /etc/raspotify/conf
-sudo sed -i 's/#DEVICE_NAME="raspotify"/DEVICE_NAME="Wohnzimmer"/' /etc/raspotify/conf
-check_command "Raspotify configuration"
+sudo sed -i 's/#LIBRESPOT_NAME="Librespot"/LIBRESPOT_NAME="Wohnzimmer"/' /etc/raspotify/conf
 
 # Configure firmware settings
 echo "Configuring firmware settings..."
@@ -84,13 +76,11 @@ else
         sudo sed -i '/^\[all\]/a enable_uart=1' /boot/firmware/config.txt
     fi
 fi
-check_command "Firmware configuration"
 
 # Start Docker containers
 echo "Starting Docker containers..."
 cd docker
 sudo docker compose up -d
-check_command "Docker startup"
 
 echo "Installation completed successfully!"
 echo "======================================"
@@ -99,6 +89,8 @@ echo "Home Assistant: http://<raspberry-ip>:8123"
 echo "Zigbee2MQTT: http://<raspberry-ip>:8080"
 echo "MQTT: mqtt://<raspberry-ip>:1883"
 echo "======================================"
-echo "MQTT password: $MQTT_PASSWORD"
+echo "MQTT Credentials for home assistant:"
+echo "Username: homeassistant"
+echo "Generated MQTT password: $homeassistant2MQTT_PASSWORD"
 echo "Please save this password for configuring Home Assistant!"
 echo "Please reboot your system for all changes to take effect."

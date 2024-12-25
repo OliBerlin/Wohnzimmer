@@ -1,0 +1,8 @@
+user zigbee2MQTT
+topic readwrite zigbee2mqtt/#
+topic write homeassistant/#
+
+user homeassistant
+topic read zigbee2mqtt/#
+topic write zigbee2mqtt/+/set
+topic readwrite homeassistant/#
