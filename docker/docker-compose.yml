@@ -13,8 +13,6 @@ services:
     devices:
       - /dev/ttyS0:/dev/ttyS0  # Gibt dem Container Zugriff auf den Conbee II Adapter
     privileged: true  # Notwendig für Hardware-Zugriff
-    depends_on:  # Startet erst nach dem MQTT-Broker
-      - mqtt
 
   # Home Assistant
   homeassistant:
