@@ -44,7 +44,7 @@ sudo echo "user: $UserID:$GroupID" /etc/mosquitto/conf.d/wohnzimmer.conf
 # Update Zigbee2MQTT configuration with MQTT password and running as
 echo "Updating Zigbee2MQTT configuration..."
 echo "user: zigbee2mqtt" >> docker/zigbee2mqtt-data/configuration.yaml
-echo "password: $ZIGBEE2MQTT_PASSWORD" >> docker/zigbee2mqtt-data/configuration.yaml
+echo "password: $zigbee2MQTT_PASSWORD" >> docker/zigbee2mqtt-data/configuration.yaml
 
 # Update and upgrade system
 echo "Updating system packages..."
