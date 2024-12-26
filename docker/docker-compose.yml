@@ -27,5 +27,4 @@ services:
       - /etc/localtime:/etc/localtime:ro # Synchronisiert die Systemzeit mit dem Host
       - /run/dbus:/run/dbus:ro   # Notwendig für verschiedene Systemintegrationen (Bluetooth, Sound, etc.)
     depends_on:  # Definiert die Startreihenfolge
-      - mqtt        # Startet nach MQTT
       - zigbee2mqtt # Startet nach Zigbee2MQTT
