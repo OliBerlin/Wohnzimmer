@@ -32,8 +32,8 @@ cd Wohnzimmer/
 # Generate and configure mosquitto 
 zigbee2MQTT_PASSWORD=$(generate_password)
 homeassistant2MQTT_PASSWORD=$(generate_password)
-UserID=id -u mosquitto
-GroupID=ig -g mosquitto
+UserID=$(id -u mosquitto)
+GroupID=$(id -g mosquitto)
 
 sudo mosquitto_passwd -H sha512-pbkdf2 -b -c /etc/mosquitto/wohnzimmer.pwd zigbee2MQTT $zigbee2MQTT_PASSWORD
 sudo mosquitto_passwd -H sha512-pbkdf2 -b /etc/mosquitto/wohnzimmer.pwd homeassistant $homeassistant2MQTT_PASSWORD
